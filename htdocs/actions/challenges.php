@@ -106,13 +106,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST['flag'] = trim($_POST['flag']);
             $challenge['flag'] = trim($challenge['flag']);
 
-            if ($challenge['case_insensitive']) {
-                if (strcasecmp($_POST['flag'], $challenge['flag']) == 0) {
-                    $correct = true;
+            /// handle multiple possible correct flags per challenge
+            /// in a very primitive way. if a stored flag contains
+            /// newlines then treat each line as a correct flag
+            if(strpos($challenge['flag'],PHP_EOL) !== FALSE) {
+                $multi_flags = explode(PHP_EOL,$challenge['flag']); // split the possible flags
+
+                /// try and validate each flag
+                foreach($multi_flags as $testflag) {
+                    $testflag = trim($testflag);
+                    if ($challenge['case_insensitive']) {
+                        if (strcasecmp($_POST['flag'], $challenge['flag']) == 0) {
+                            $correct = true;
+                        }
+                    } else {
+                        if (strcmp($_POST['flag'], $challenge['flag']) == 0) {
+                            $correct = true;
+                        }
+                    }
                 }
             } else {
-                if (strcmp($_POST['flag'], $challenge['flag']) == 0) {
-                    $correct = true;
+                if ($challenge['case_insensitive']) {
+                    if (strcasecmp($_POST['flag'], $challenge['flag']) == 0) {
+                        $correct = true;
+                    }
+                } else {
+                    if (strcmp($_POST['flag'], $challenge['flag']) == 0) {
+                        $correct = true;
+                    }
                 }
             }
         }
